@@ -1,0 +1,84 @@
+<!DOCTYPE html>  
+<html>  
+<head>  
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />  
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />  
+    <title>Baidu Map </title>  
+    <style type="text/css">  
+        html{height:100%}  
+        body{height:100%;margin:0px;padding:0px}
+        #container{height:100%}  
+    </style>  
+    <link rel="stylesheet" href="../css/address.css"/>
+    <link rel="stylesheet" href="../css/common.css"/>
+    <link rel="stylesheet" href="../css/cssreset-min.css"/>
+</head>  
+<body>
+<button onclick="showLoading()">1223</button>
+
+<div id="content" class="content">
+	<div>
+		<div id="select" class="citys">
+			<select id="province" style="height:30px;width:100px;font-size:15px;" name="province"><option value="">-省-</option></select>
+			<select id="city" style="height:30px;width:100px;font-size:15px;" name="city"><option value="">-市-</option></select>
+			<select id="area" style="height:30px;width:100px;font-size:15px;" name="area"><option value="">-区-</option></select>
+			<select id="town" style="height:30px;width:100px;font-size:15px;" name="town"><option value="">-街道-</option></select>
+			<input id="street" style="height:26px;width:100px;font-size:15px;padding-left:5px;" placeholder="道路">
+		</div>
+		
+		<div style="margin-top:10px;">
+			<input id="address" class="address" type="text" placeholder="地址实体">
+			<input id="seven" class="seven" type="text" placeholder="七级地址">
+		    <button id="search"  class="search">查找</button>
+	    </div>
+	    <div style="margin-top:10px;">
+			<input id="lng" class="lng" type="text" placeholder="经度">
+			<input id="lat" class="lat" type="text" placeholder="维度">
+		    <button id="reverseSearch" class="reverseSearch">逆向查找</button>
+		    <span></span>
+	    </div>
+	    <div style="margin-top:10px;">
+		    <button id="import" onclick="importAddress('import')" class="check">录入</button>
+		    <button id="empty" class="search">清空</button>
+		    <button id="copy" class="search">复制</button>
+		    <span style="margin-left:20px;font-size:15px;" id="confidence"></span>
+	    </div>
+    </div>
+    <div style="margin-top:10px;">
+    	<div id="poi" class="poi">
+    		<span style='font-weight:bold;'>poi列表:</span>
+    		<ol style='color:#4CAF50;' id='poiPlace'></ol>
+    		<div style='float:right;'><a onclick="changePage(1,1,1)" href='#'>下一页》</a></div>
+    		<!-- <div style='float:right;margin-right:20px;'><a onclick="changePage(1,1,0)" href='#'>《上一页</a></div> -->
+    	</div>
+    	<div id="library" class="library">
+    		<span style='font-weight:bold;'>地址库列表:</span>
+    		<ol style='color:#4CAF50;' id='libraryPlace'></ol>
+    		<div style='float:right;'><a href='#'>下一页》</a></div>
+    		<!-- <div style='float:right;margin-right:20px;'><a onclick="changePage(1,1,0)" href='#'>《上一页</a></div> -->
+    	</div>
+    </div>
+    <div>
+    	<div id="aroundPoi" class="poi">
+    		<span style='font-weight:bold;'>周边100米poi列表:</span>
+    		<ol style='color:#4CAF50;' id='aroundPoiPlace'></ol>
+    		<div style='float:right;'><a href='#'>下一页》</a></div>
+    		<!-- <div style='float:right;margin-right:20px;'><a onclick="changePage(1,1,0)" href='#'>《上一页</a></div> -->
+    	</div>
+    	<div id="aroundLibrary" class="library">
+    		<span style='font-weight:bold;'>周边100米地址库列表:</span>
+    		<ol style='color:#4CAF50;' id='aroundLibraryPlace'></ol>
+    		<div style='float:right;'><a href='#'>下一页》</a></div>
+    		<!-- <div style='float:right;margin-right:20px;'><a onclick="changePage(1,1,0)" href='#'>《上一页</a></div> -->
+    	</div>
+    </div>
+</div>
+<div id="container"></div> 
+</body>
+<script type="text/javascript" src="http://lbsyun.baidu.com/jsdemo/data/points-sample-data.js"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ijfwv9AuV1fGln7IFVoBCarOs8GE0pxb"></script>
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/jquery.citys.js"></script>
+<script type="text/javascript" src="../js/address.js"></script>
+<script type="text/javascript" src="../js/cvi_busy_lib.js"></script>
+</html>
