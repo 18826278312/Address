@@ -101,4 +101,11 @@ public interface AddressService {
 	 * @throws Exception
 	 */
 	List<PlaceResult> listPlaceResult(AlibabaPlaceDto alibabaPlaceDto,BaiduPlaceDto baiduPlaceDto,TencentPlaceDto tencentPlaceDto) throws Exception;
+	
+	/**
+	 * 将百度的地址四级补全
+	 * @param baiduPlaceDto
+	 * @return
+	 */
+	List<PlaceResult> listPlaceResult(BaiduPlaceDto baiduPlaceDto);
 }

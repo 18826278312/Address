@@ -34,7 +34,7 @@ public class AddressServiceImpl implements AddressService{
 	private String alibabaKey;
 	@Value("${tencent.key}")
 	private String tencentKey;
-	private String[] pois = {"医院","银行","商场","小区"};
+	private String[] pois = {"医院","银行","商场","小区","广场","学校","体育馆","市场"};
 	
 	@Value("${range}")
 	private Integer range;
@@ -241,6 +241,28 @@ public class AddressServiceImpl implements AddressService{
 				addressLocation.setLat(location.getResult().get(i).getY());
 				addressLocation.setLng(location.getResult().get(i).getX());
 				placeResult.setDataSources("高德地图");
+				placeResult.setLocation(addressLocation);
+				this.getCompleteAddress(placeResult);
+				list.add(placeResult);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	@Override
+	public List<PlaceResult> listPlaceResult(BaiduPlaceDto baiduPlaceDto) {
+		List<PlaceResult> list = new ArrayList<PlaceResult>();
+		try {
+			for(int i=0;i<baiduPlaceDto.getResults().size();i++){
+				PlaceResult placeResult = new PlaceResult();
+				placeResult.setName(baiduPlaceDto.getResults().get(i).getName());
+				AddressLocation addressLocation = new AddressLocation();
+				addressLocation.setLat(baiduPlaceDto.getResults().get(i).getLocation().getLat());
+				addressLocation.setLng(baiduPlaceDto.getResults().get(i).getLocation().getLng());
+				placeResult.setDataSources("百度地图");
 				placeResult.setLocation(addressLocation);
 				this.getCompleteAddress(placeResult);
 				list.add(placeResult);

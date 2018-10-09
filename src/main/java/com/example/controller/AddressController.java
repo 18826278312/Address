@@ -54,20 +54,29 @@ public class AddressController {
 			//参数1:用户输入的地址对象
 			PlaceResult currentAddress = new PlaceResult();
 			currentAddress.setName(address);
-			//获取百度、高德、腾讯的poi点数据
+			//获取百度poi点数据
 			BaiduPlaceDto baiduPlaceDto = addressService.getPlaceByBaidu(address);
-			TencentPlaceDto tencentPlaceDto = addressService.getPlaceByTencent(address);
-			AlibabaPlaceDto alibabaPlaceDto = addressService.getPlaceByAlibaba(address);
-			//将百度、高德、腾讯的poi点的合并并将前四级补全
-			List<PlaceResult> poiList = addressService.listPlaceResult(alibabaPlaceDto, baiduPlaceDto, tencentPlaceDto);
+			//TencentPlaceDto tencentPlaceDto = addressService.getPlaceByTencent(address);
+			//AlibabaPlaceDto alibabaPlaceDto = addressService.getPlaceByAlibaba(address);
+			//将百度poi点的前四级补全
+			List<PlaceResult> poiList = addressService.listPlaceResult(baiduPlaceDto);
 			System.out.println(poiList.size());
 			System.out.println(JSONArray.toJSON(poiList));
 			/*
 			 * 后台接口调用1：将前面两个变量作为调用的参数（currentAddress、poiList），并返回一个poiList和一个libraryList，将这两个list添加到map中返回到前端
 			 */
+			List<PlaceResult> list1 = new ArrayList<PlaceResult>();
+			List<PlaceResult> list2 = new ArrayList<PlaceResult>();
+			for(int i=0;i<poiList.size();i++){
+				if (i%2==0) {
+					list1.add(poiList.get(i));
+				}else {
+					list2.add(poiList.get(i));
+				}
+			}
 			map.put("status", 0);
 			map.put("poi", poiList);
-			map.put("library", poiList);
+			map.put("library", list2);
 		} catch (Exception e) {
 			e.printStackTrace();
 			map.put("status", 5);
@@ -126,21 +135,35 @@ public class AddressController {
 			 */
 			
 			
-			//获取百度、高德、腾讯的周边100米相关poi点数据
+			//获取百度周边100米相关poi点数据
 			BaiduPlaceDto baiduPlaceDto = addressService.getBaiduAround(lng, lat);
-			TencentPlaceDto tencentPlaceDto = addressService.getTencentAround(lng, lat);
-			AlibabaPlaceDto alibabaPlaceDto = addressService.getAlibabaAround(lng, lat);
-			//将百度、高德、腾讯的poi点的合并并将前四级补全
-			List<PlaceResult> poiList = addressService.listPlaceResult(alibabaPlaceDto, baiduPlaceDto, tencentPlaceDto);
+			//将百度poi点前四级补全
+			List<PlaceResult> poiList = addressService.listPlaceResult(baiduPlaceDto);
+			//将list中与地图定位的地址重复的地址删除
+			for (int i=0;i<poiList.size();i++) {
+				if (poiList.get(i).getLocation().getLat().equals(lat) && poiList.get(i).getLocation().getLng().equals(lng)) {
+					poiList.remove(i);
+					break;
+				}
+			}
 			System.out.println(poiList.size());
 			System.out.println(JSONArray.toJSON(poiList));
 			/*
 			 * 后台接口调用2：将前面两个变量作为调用的参数（currentAddress、poiList），并返回周边100米一个poiList和一个libraryList，将这两个list添加到map中返回到前端
 			 */
 			
+			List<PlaceResult> list1 = new ArrayList<PlaceResult>();
+			List<PlaceResult> list2 = new ArrayList<PlaceResult>();
+			for(int i=0;i<poiList.size();i++){
+				if (i%2==0) {
+					list1.add(poiList.get(i));
+				}else {
+					list2.add(poiList.get(i));
+				}
+			}
 			map.put("status", 0);
 			map.put("poi", poiList);
-			map.put("library", poiList);
+			map.put("library", list2);
 			map.put("info", "该地址可信度为80%");
 		} catch (Exception e) {
 			e.printStackTrace();

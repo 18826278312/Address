@@ -2,6 +2,12 @@ var poiList = [];
 var libraryList = [];
 var aroundPoiList = [];
 var aroundLibraryList = [];
+var poiPage = 0;
+var libraryPage = 0;
+var aroundPoiPage = 0;
+var aroundLibraryPage = 0;
+var clickLat = 0;
+var clickLnt = 0;
 var formerAddress;
 var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_BOTTOM_RIGHT});// 左上角，添加比例尺
 var top_left_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_BOTTOM_RIGHT});  //左上角，添加默认缩放平移控件
@@ -30,6 +36,8 @@ bdary.get("汕头市", function(rs){       //获取行政区域
 
 //查找地址
 $("#search").click(function(){
+	$("#aroundPoi").hide();
+	$("#aroundLibrary").hide();
 	var allOverlay = map.getOverlays();
 	for (var i = 0; i < allOverlay.length; i++){
         if(allOverlay[i] == "[object Marker]" ){
@@ -53,14 +61,18 @@ $("#search").click(function(){
 				//添加poi列表
 				$("#poi").show();
 				$("#poiPlace").empty();
+				$("#poi #poiPage").empty();
 				var points = [];
-				var length = poiList.length>=5 ? 5 : poiList.length;
+				var length = poiList.length>5 ? 5 : poiList.length;
 				for(var i=0;i<length;i++){
 					var a = i+1;
-					var li = "<li><a onclick='clickAddress(" + JSON.stringify(poiList[i]) + ")' style='color:#4CAF50' href='#'>" + a + "、" + poiList[i].address + "</a></li>";
+					var li = "<li><a onclick='clickAddress(" + JSON.stringify(poiList[i]) + ")' style='color:#2B80FA' href='#'>" + a + "、" + poiList[i].address + "</a></li>";
 					$("#poiPlace").append(li);
+					var myIcon = new BMap.Icon("../image/blue_30.png", {
+					    offset: new BMap.Size(10, 25)
+					});
 					var point = new BMap.Point(poiList[i].location.lng,poiList[i].location.lat);
-					var marker = new BMap.Marker(point);  // 创建标注
+					var marker = new BMap.Marker(point,{icon: myIcon});  // 创建标注
 					marker.disableMassClear();
 					if(i+1>=10){
 						var label = new BMap.Label(i+1, {
@@ -78,23 +90,25 @@ $("#search").click(function(){
 			       	map.addOverlay(marker);              // 将标注添加到地图中
 			       	points.push(poiList[i].location);
 				}
-				//$("#poi").append("<div style='margin-left:150px;float:left;'><a><上一页</a></div>");
-				//$("#poi").append("<div style='margin-left:20px;float:left;'><a>下一页></a></div>");
-				var view = map.getViewport(eval(points));
-				var mapZoom = view.zoom; 
-				var centerPoint = view.center; 
-				map.centerAndZoom(centerPoint,mapZoom);
+				poiPage = 1;
+				if(poiList.length>5){
+					$("#poi #poiPage").append("<div style='float:right;'><a style='color:#2B80FA' href='#' onclick='changePage(2,1)'>下一页》</a></div>");
+				}
 				
 				//添加地址库列表
 				$("#library").show();
 				$("#libraryPlace").empty();
-				var length = libraryList.length>=5 ? 5 : libraryList.length;
+				$("#library #libraryPage").empty();
+				var length = libraryList.length>5 ? 5 : libraryList.length;
 				for(var i=0;i<length;i++){
 					var a = i + 1;
-					var li = "<li><a onclick='clickAddress(" + JSON.stringify(libraryList[i]) + ")' style='color:#4CAF50' href='#'>" + a + "、" + libraryList[i].address + "</a></li>";
+					var li = "<li><a onclick='clickAddress(" + JSON.stringify(libraryList[i]) + ")' style='color:#ED4634' href='#'>" + a + "、" + libraryList[i].address + "</a></li>";
 					$("#libraryPlace").append(li);
+					var myIcon = new BMap.Icon("../image/red_30.png", {
+					    offset: new BMap.Size(10, 25)
+					});
 					var point = new BMap.Point(libraryList[i].location.lng,libraryList[i].location.lat);
-					var marker = new BMap.Marker(point);  // 创建标注
+					var marker = new BMap.Marker(point,{icon: myIcon});  // 创建标注
 					marker.disableMassClear();
 					if(i+1>=10){
 						var label = new BMap.Label(i+1, {
@@ -112,8 +126,15 @@ $("#search").click(function(){
 			       	map.addOverlay(marker);              // 将标注添加到地图中
 			       	points.push(libraryList[i].location);
 				}
-				//$("#library").append("<div style='margin-left:150px;float:left;'><a><上一页</a></div>");
-				//$("#library").append("<div style='margin-left:20px;float:left;'><a>下一页></a></div>");
+				libraryPage = 1;
+				if(libraryList.length>5){
+					$("#library #libraryPage").append("<div style='float:right;'><a style='color:#ED4634' href='#' onclick='changePage(2,2)'>下一页》</a></div>");
+				}
+				
+				var view = map.getViewport(eval(points));
+				var mapZoom = view.zoom; 
+				var centerPoint = view.center; 
+				map.centerAndZoom(centerPoint,mapZoom);
 			}
 		},"json");
 	}
@@ -160,9 +181,9 @@ function setEmpty(){
 	$("#confidence").html("");
 	$("#street").val("");
 	$("#province").empty();
-	$("#province").append('<option value="">-省-</option>');
+	$("#province").append('<option value="">广东省</option>');
 	$("#city").empty();
-	$("#city").append('<option value="">-市-</option>');
+	$("#city").append('<option value="">汕头市</option>');
 	$("#area").empty();
 	$("#area").append('<option value="">-区-</option>');
 	$("#town").empty();
@@ -173,8 +194,19 @@ function setEmpty(){
 $("#empty").click(function(){
 	setEmpty();
 	$("#address").val("");
+	$("#seven").val("");
 	$("#lat").val("");
 	$("#lng").val("");
+	$("#poi").hide();
+	$("#library").hide();
+	$("#aroundPoi").hide();
+	$("#aroundLibrary").hide();
+	var allOverlay = map.getOverlays();
+	for (var i = 0; i < allOverlay.length; i++){
+        if(allOverlay[i] == "[object Marker]" ){
+        	 map.removeOverlay(allOverlay[i]);
+        }
+    }
 })
 
 $("#copy").click(function(){
@@ -186,14 +218,18 @@ $("#copy").click(function(){
 	var address = $("#address").val();
 	var seven = $("#seven").val();
 	var copy = province + city + area + town + street + address + seven;
-	var oInput = document.createElement('input');
-	oInput.value = copy;
-	document.body.appendChild(oInput);
-	oInput.select(); // 选择对象
-	document.execCommand("Copy"); // 执行浏览器复制命令
-	oInput.className = 'oInput';
-	oInput.style.display='none';
-	alert('复制成功');
+	if(copy!=""){
+		var oInput = document.createElement('input');
+		oInput.value = copy;
+		document.body.appendChild(oInput);
+		oInput.select(); // 选择对象
+		document.execCommand("Copy"); // 执行浏览器复制命令
+		oInput.className = 'oInput';
+		oInput.style.display='none';
+		alert('复制成功');
+	}else{
+		alert('地址为空，复制失败');
+	}
 })
 
 //根据经纬度逆向查找对应的地址信息，并回填
@@ -222,15 +258,25 @@ function getLocation(lat,lng){
 
 //获取当前选中地址周边100米的标志性建筑物；计算当前选中地址的可信度
 function getAroundAddress(lat,lng){
+	$("#poiPlace li a").css("color","#4CAF50");
+	$("#libraryPlace li a").css("color","#4CAF50");
+	$("#poi #poiPage div a").css("color","#4CAF50");
+	$("#library #libraryPage div a").css("color","#4CAF50");
 	var allOverlay = map.getOverlays();
 	for (var i = 0; i < allOverlay.length; i++){
         if(allOverlay[i] == "[object Marker]" ){
         	 map.removeOverlay(allOverlay[i]);
         }
     }
+	clickLat = lat;
+	clickLng = lng;
 	var points = [];
+	//当前选中的标注变大
+	var myIcon = new BMap.Icon("../image/red_50.png", {
+	    offset: new BMap.Size(10, 25)
+	});
 	var point = new BMap.Point(lng,lat);
-    var marker = new BMap.Marker(point);  // 创建标注
+    var marker = new BMap.Marker(point,{icon: myIcon});  // 创建标注
 	marker.disableMassClear();
 	map.addOverlay(marker);// 将标注添加到地图中
 	var json ='{"lat":' + lat + ',"lng":' + lng+ '}';
@@ -264,13 +310,17 @@ function getAroundAddress(lat,lng){
 			//添加arountPoi列表
 			$("#aroundPoi").show();
 			$("#aroundPoiPlace").empty();
-			var length = aroundPoiList.length>=5 ? 5 : aroundPoiList.length;
+			$("#aroundPoi #aroundPoiPage").empty();
+			var length = aroundPoiList.length>5 ? 5 : aroundPoiList.length;
 			for(var i=0;i<length;i++){
 				var a = i+1;
-				var li = "<li style='color:#4CAF50'>" + a + "、" + aroundPoiList[i].address + "</li>";
+				var li = "<li style='color:#2B80FA'>" + a + "、" + aroundPoiList[i].address + "</li>";
 				$("#aroundPoiPlace").append(li);
+				var myIcon = new BMap.Icon("../image/blue_30.png", {
+				    offset: new BMap.Size(10, 25)
+				});
 				var point = new BMap.Point(aroundPoiList[i].location.lng,aroundPoiList[i].location.lat);
-				var marker = new BMap.Marker(point);  // 创建标注
+				var marker = new BMap.Marker(point,{icon: myIcon});  // 创建标注
 				marker.disableMassClear();
 				if(i+1>=10){
 					var label = new BMap.Label(i+1, {
@@ -288,23 +338,25 @@ function getAroundAddress(lat,lng){
 		       	map.addOverlay(marker);              // 将标注添加到地图中
 		       	points.push(aroundPoiList[i].location);
 			}
-			//$("#aroundPoi").append("<div style='margin-left:150px;float:left;'><a><上一页</a></div>");
-			//$("#aroundPoi").append("<div style='margin-left:20px;float:left;'><a>下一页></a></div>");
-			var view = map.getViewport(eval(points));
-			var mapZoom = view.zoom; 
-			var centerPoint = view.center; 
-			map.centerAndZoom(centerPoint,mapZoom);
+			aroundPoiPage = 1;
+			if(aroundPoiList.length>5){
+				$("#aroundPoi #aroundPoiPage").append("<div style='float:right;'><a style='color:#2B80FA' href='#' onclick='changeAroundPage(2,1)'>下一页》</a></div>");
+			}
 			
 			//添加地址库列表
 			$("#aroundLibrary").show();
 			$("#aroundLibraryPlace").empty();
-			var length = aroundLibraryList.length>=5 ? 5 : aroundLibraryList.length;
+			$("#aroundLibrary #aroundLibraryPage").empty();
+			var length = aroundLibraryList.length>5 ? 5 : aroundLibraryList.length;
 			for(var i=0;i<length;i++){
 				var a = i+1;
-				var li = "<li style='color:#4CAF50'>" + a + "、" + aroundLibraryList[i].address + "</li>";
+				var li = "<li style='color:#ED4634'>" + a + "、" + aroundLibraryList[i].address + "</li>";
 				$("#aroundLibraryPlace").append(li);
+				var myIcon = new BMap.Icon("../image/red_30.png", {
+				    offset: new BMap.Size(10, 25)
+				});
 				var point = new BMap.Point(aroundLibraryList[i].location.lng,aroundLibraryList[i].location.lat);
-				var marker = new BMap.Marker(point);  // 创建标注
+				var marker = new BMap.Marker(point,{icon: myIcon});  // 创建标注
 				marker.disableMassClear();
 				if(i+1>=10){
 					var label = new BMap.Label(i+1, {
@@ -322,8 +374,15 @@ function getAroundAddress(lat,lng){
 		       	map.addOverlay(marker);              // 将标注添加到地图中
 		       	points.push(aroundLibraryList[i].location);
 			}
-			//$("#aroundLibrary").append("<div style='margin-left:150px;float:left;'><a href='#'><上一页</a></div>");
-			//$("#aroundLibrary").append("<div style='margin-left:20px;float:left;'><a>下一页></a></div>");
+			aroundLibraryPage = 1;
+			if(aroundLibraryList.length>5){
+				$("#aroundLibrary #aroundLibraryPage").append("<div style='float:right;'><a style='color:#ED4634' href='#' onclick='changeAroundPage(2,2)'>下一页》</a></div>");
+			}
+			
+			var view = map.getViewport(eval(points));
+			var mapZoom = view.zoom; 
+			var centerPoint = view.center; 
+			map.centerAndZoom(centerPoint,mapZoom);
 		}
 	},"json")
 }
@@ -358,16 +417,225 @@ function importAddress(type){
 	}
 }
 
-function changePage(page,num,type){
-	var list = [];
-	if(num==1){
-		list = poiList;
-	}else if(num==2){
-		list = libraryList;
-	}else if(num==3){
-		list = aroundPoiList;
-	}else if(num==4){
-		list = aroundLibraryList;
+function changePage(page,type){
+	$("#aroundPoi").hide();
+	$("#aroundLibrary").hide();
+	$("#poi #poiPage div a").css("color","#2B80FA");
+	$("#library #libraryPage div a").css("color","#ED4634");
+	if(type == 1){
+		poiPage = page;
+		$("#poi #poiPage").empty();
+		var previous = page-1;
+		var next = page+1;
+		if(page==1){
+			$("#poi #poiPage").append("<div style='float:right;'><a style='color:#2B80FA' href='#' onclick='changePage(" + next + ",1)'>下一页》</a></div>");
+		}else if(poiList.length > page*5){
+			$("#poi #poiPage").append("<div style='float:right;'><a style='color:#2B80FA' href='#' onclick='changePage(" + next + ",1)'>下一页》</a></div>");
+			$("#poi #poiPage").append("<div style='float:right;margin-right:20px;'><a style='color:#2B80FA' href='#' onclick='changePage(" + previous + ",1)'>《上一页</a></div>");
+		}else{
+			$("#poi #poiPage").append("<div style='float:right;'><a style='color:#2B80FA' href='#' onclick='changePage(" + previous + ",1)'>《上一页</a></div>");
+		}
+	}else if(type == 2){
+		libraryPage = page;
+		$("#library #libraryPage").empty();
+		var previous = page-1;
+		var next = page+1;
+		if(page==1){
+			$("#library #libraryPage").append("<div style='float:right;'><a style='color:#ED4634' href='#' onclick='changePage(" + next + ",2)'>下一页》</a></div>");
+		}else if(libraryList.length > page*5){
+			$("#library #libraryPage").append("<div style='float:right;'><a style='color:#ED4634' href='#' onclick='changePage(" + next + ",2)'>下一页》</a></div>");
+			$("#library #libraryPage").append("<div style='float:right;margin-right:20px;'><a style='color:#ED4634' href='#' onclick='changePage(" + previous + ",2)'>《上一页</a></div>");
+		}else{
+			$("#library #libraryPage").append("<div style='float:right;'><a style='color:#ED4634' href='#' onclick='changePage(" + previous + ",2)'>《上一页</a></div>");
+		}
 	}
+	intoPage();
+}
+
+function intoPage(){
+	var allOverlay = map.getOverlays();
+	for (var i = 0; i < allOverlay.length; i++){
+        if(allOverlay[i] == "[object Marker]" ){
+        	 map.removeOverlay(allOverlay[i]);
+        }
+    }
+	var length = poiList.length>=poiPage*5 ? poiPage*5 : poiList.length;
+	var points = [];
+	$("#poiPlace").empty();
+	for(var i=poiPage*5-5;i<length;i++){
+		var a = i+1;
+		var li = "<li><a onclick='clickAddress(" + JSON.stringify(poiList[i]) + ")' style='color:#2B80FA' href='#'>" + a + "、" + poiList[i].address + "</a></li>";
+		$("#poiPlace").append(li);
+		var myIcon = new BMap.Icon("../image/blue_30.png", {
+		    offset: new BMap.Size(10, 25)
+		});
+		var point = new BMap.Point(poiList[i].location.lng,poiList[i].location.lat);
+		var marker = new BMap.Marker(point,{icon: myIcon});  // 创建标注
+		marker.disableMassClear();
+		if(i+1>=10){
+			var label = new BMap.Label(i+1, {
+                offset : new BMap.Size(1, 4)
+            }); 
+		}else{
+			var label = new BMap.Label(i+1, {
+                offset : new BMap.Size(5, 4)
+            }); 
+		}
+		label.setStyle({
+           background:'none',color:'#fff',border:'none'//只要对label样式进行设置就可达到在标注图标上显示数字的效果
+        });
+		marker.setLabel(label);//显示地理名称 a
+       	map.addOverlay(marker);              // 将标注添加到地图中
+       	points.push(poiList[i].location);
+	}
+	
+	var length = libraryList.length>=libraryPage*5 ? libraryPage*5 : libraryList.length;
+	$("#libraryPlace").empty();
+	for(var i=libraryPage*5-5;i<length;i++){
+		var a = i+1;
+		var li = "<li><a onclick='clickAddress(" + JSON.stringify(libraryList[i]) + ")' style='color:#ED4634' href='#'>" + a + "、" + libraryList[i].address + "</a></li>";
+		$("#libraryPlace").append(li);
+		var myIcon = new BMap.Icon("../image/red_30.png", {
+		    offset: new BMap.Size(10, 25)
+		});
+		var point = new BMap.Point(libraryList[i].location.lng,libraryList[i].location.lat);
+		var marker = new BMap.Marker(point,{icon: myIcon});  // 创建标注
+		marker.disableMassClear();
+		if(i+1>=10){
+			var label = new BMap.Label(i+1, {
+                offset : new BMap.Size(1, 4)
+            }); 
+		}else{
+			var label = new BMap.Label(i+1, {
+                offset : new BMap.Size(5, 4)
+            }); 
+		}
+		label.setStyle({
+           background:'none',color:'#fff',border:'none'//只要对label样式进行设置就可达到在标注图标上显示数字的效果
+        });
+		marker.setLabel(label);//显示地理名称 a
+       	map.addOverlay(marker);              // 将标注添加到地图中
+       	points.push(libraryList[i].location);
+	}
+	
+	var view = map.getViewport(eval(points));
+	var mapZoom = view.zoom; 
+	var centerPoint = view.center; 
+	map.centerAndZoom(centerPoint,mapZoom);
+}
+
+function changeAroundPage(page,type){
+	if(type == 1){
+		aroundPoiPage = page;
+		$("#aroundPoi #aroundPoiPage").empty();
+		var previous = page-1;
+		var next = page+1;
+		if(page==1){
+			$("#aroundPoi #aroundPoiPage").append("<div style='float:right;'><a style='color:#2B80FA' href='#' onclick='changeAroundPage(" + next + ",1)'>下一页》</a></div>");
+		}else if(aroundPoiList.length > page*5){
+			$("#aroundPoi #aroundPoiPage").append("<div style='float:right;'><a style='color:#2B80FA' href='#' onclick='changeAroundPage(" + next + ",1)'>下一页》</a></div>");
+			$("#aroundPoi #aroundPoiPage").append("<div style='float:right;margin-right:20px;'><a style='color:#2B80FA' href='#' onclick='changeAroundPage(" + previous + ",1)'>《上一页</a></div>");
+		}else{
+			$("#aroundPoi #aroundPoiPage").append("<div style='float:right;'><a style='color:#2B80FA' href='#' onclick='changeAroundPage(" + previous + ",1)'>《上一页</a></div>");
+		}
+	}else if(type == 2){
+		aroundLibraryPage = page;
+		$("#aroundLibrary #aroundLibraryPage").empty();
+		var previous = page-1;
+		var next = page+1;
+		if(page==1){
+			$("#aroundLibrary #aroundLibraryPage").append("<div style='float:right;'><a style='color:#ED4634' href='#' onclick='changeAroundPage(" + next + ",2)'>下一页》</a></div>");
+		}else if(aroundLibraryList.length > page*5){
+			$("#aroundLibrary #aroundLibraryPage").append("<div style='float:right;'><a style='color:#ED4634' href='#' onclick='changeAroundPage(" + next + ",2)'>下一页》</a></div>");
+			$("#aroundLibrary #aroundLibraryPage").append("<div style='float:right;margin-right:20px;'><a style='color:#ED4634' href='#' onclick='changeAroundPage(" + previous + ",2)'>《上一页</a></div>");
+		}else{
+			$("#aroundLibrary #aroundLibraryPage").append("<div style='float:right;'><a style='color:#ED4634' href='#' onclick='changeAroundPage(" + previous + ",2)'>《上一页</a></div>");
+		}
+	}
+	intoAroundPage();
+}
+
+
+function intoAroundPage(){
+	var allOverlay = map.getOverlays();
+	for (var i = 0; i < allOverlay.length; i++){
+        if(allOverlay[i] == "[object Marker]" ){
+        	 map.removeOverlay(allOverlay[i]);
+        }
+    }
+	var points = [];
+	//当前选中的标注变大
+	var myIcon = new BMap.Icon("../image/red_50.png", {
+	    offset: new BMap.Size(10, 25)
+	});
+	var point = new BMap.Point(clickLng,clickLat);
+    var marker = new BMap.Marker(point,{icon: myIcon});  // 创建标注
+	marker.disableMassClear();
+	map.addOverlay(marker);// 将标注添加到地图中
+	var json ='{"lat":' + clickLat + ',"lng":' + clickLng+ '}';
+	points.push(JSON.parse(json));
+	
+	var length = aroundPoiList.length>=aroundPoiPage*5 ? aroundPoiPage*5 : aroundPoiList.length;
+	$("#aroundPoiPlace").empty();
+	for(var i=aroundPoiPage*5-5;i<length;i++){
+		var a = i+1;
+		var li = "<li style='color:#2B80FA'>" + a + "、" + aroundPoiList[i].address + "</li>";
+		$("#aroundPoiPlace").append(li);
+		var myIcon = new BMap.Icon("../image/blue_30.png", {
+		    offset: new BMap.Size(10, 25)
+		});
+		var point = new BMap.Point(aroundPoiList[i].location.lng,aroundPoiList[i].location.lat);
+		var marker = new BMap.Marker(point,{icon: myIcon});  // 创建标注
+		marker.disableMassClear();
+		if(i+1>=10){
+			var label = new BMap.Label(i+1, {
+                offset : new BMap.Size(1, 4)
+            }); 
+		}else{
+			var label = new BMap.Label(i+1, {
+                offset : new BMap.Size(5, 4)
+            }); 
+		}
+		label.setStyle({
+           background:'none',color:'#fff',border:'none'//只要对label样式进行设置就可达到在标注图标上显示数字的效果
+        });
+		marker.setLabel(label);//显示地理名称 a
+       	map.addOverlay(marker);              // 将标注添加到地图中
+       	points.push(aroundPoiList[i].location);
+	}
+	
+	var length = aroundLibraryList.length>=aroundLibraryPage*5 ? aroundLibraryPage*5 : aroundLibraryList.length;
+	$("#aroundLibraryPlace").empty();
+	for(var i=aroundLibraryPage*5-5;i<length;i++){
+		var a = i+1;
+		var li = "<li style='color:#ED4634'>" + a + "、" + aroundLibraryList[i].address + "</li>";
+		$("#aroundLibraryPlace").append(li);
+		var myIcon = new BMap.Icon("../image/red_30.png", {
+		    offset: new BMap.Size(10, 25)
+		});
+		var point = new BMap.Point(aroundLibraryList[i].location.lng,aroundLibraryList[i].location.lat);
+		var marker = new BMap.Marker(point,{icon: myIcon});  // 创建标注
+		marker.disableMassClear();
+		if(i+1>=10){
+			var label = new BMap.Label(i+1, {
+                offset : new BMap.Size(1, 4)
+            }); 
+		}else{
+			var label = new BMap.Label(i+1, {
+                offset : new BMap.Size(5, 4)
+            }); 
+		}
+		label.setStyle({
+           background:'none',color:'#fff',border:'none'//只要对label样式进行设置就可达到在标注图标上显示数字的效果
+        });
+		marker.setLabel(label);//显示地理名称 a
+       	map.addOverlay(marker);              // 将标注添加到地图中
+       	points.push(aroundLibraryList[i].location);
+	}
+	
+	var view = map.getViewport(eval(points));
+	var mapZoom = view.zoom; 
+	var centerPoint = view.center; 
+	map.centerAndZoom(centerPoint,mapZoom);
 }
 
