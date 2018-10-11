@@ -135,6 +135,9 @@ $("#search").click(function(){
 				var mapZoom = view.zoom; 
 				var centerPoint = view.center; 
 				map.centerAndZoom(centerPoint,mapZoom);
+			}else{
+				$("#prompt").show();
+				$("#prompt").html(data.info);
 			}
 		},"json");
 	}
@@ -238,21 +241,26 @@ function getLocation(lat,lng){
 		"lng":lng,
 		"lat":lat
 	},function(data){
-		$("#province").empty();
-		$("#province").append('<option value="' + data.geocoderDto.result.addressComponent.province + '">' + data.geocoderDto.result.addressComponent.province + '</option>');
-		$("#city").empty();
-		$("#city").append('<option value="' + data.geocoderDto.result.addressComponent.city + '">' + data.geocoderDto.result.addressComponent.city + '</option>');
-		$("#area").empty();
-		$("#area").append('<option value="' + data.geocoderDto.result.addressComponent.district + '">' + data.geocoderDto.result.addressComponent.district + '</option>');
-		$("#town").empty();
-		$("#town").append('<option value="' + data.geocoderDto.result.addressComponent.town + '">' + data.geocoderDto.result.addressComponent.town + '</option>');
-		$("#street").val(data.geocoderDto.result.addressComponent.street);
-		if($("#address").val()==""){
-			$("#address").val(data.geocoderDto.result.sematic_description);
+		if(data.status==0){
+			$("#province").empty();
+			$("#province").append('<option value="' + data.geocoderDto.result.addressComponent.province + '">' + data.geocoderDto.result.addressComponent.province + '</option>');
+			$("#city").empty();
+			$("#city").append('<option value="' + data.geocoderDto.result.addressComponent.city + '">' + data.geocoderDto.result.addressComponent.city + '</option>');
+			$("#area").empty();
+			$("#area").append('<option value="' + data.geocoderDto.result.addressComponent.district + '">' + data.geocoderDto.result.addressComponent.district + '</option>');
+			$("#town").empty();
+			$("#town").append('<option value="' + data.geocoderDto.result.addressComponent.town + '">' + data.geocoderDto.result.addressComponent.town + '</option>');
+			$("#street").val(data.geocoderDto.result.addressComponent.street);
+			if($("#address").val()==""){
+				$("#address").val(data.geocoderDto.result.sematic_description);
+			}
+			formerAddress = data.geocoderDto.result.sematic_description;
+			//回填成功时候调用
+			getAroundAddress(lat,lng);
+		}else{
+			$("#prompt").show();
+			$("#prompt").html(data.info);
 		}
-		formerAddress = data.geocoderDto.result.sematic_description;
-		//回填成功时候调用
-		getAroundAddress(lat,lng);
 	},"json");
 }
 
@@ -383,6 +391,9 @@ function getAroundAddress(lat,lng){
 			var mapZoom = view.zoom; 
 			var centerPoint = view.center; 
 			map.centerAndZoom(centerPoint,mapZoom);
+		}else{
+			$("#prompt").show();
+			$("#prompt").html(data.info);
 		}
 	},"json")
 }
@@ -394,12 +405,14 @@ function importAddress(type){
 	var town = $("#town").val();
 	var street = $("#street").val();
 	var address = $("#address").val();
+	var seven = $("#seven").val();
 	var lng = $("#lng").val();
 	var lat = $("#lat").val();
+	var completeAddress = province + city + area + town + street + address + seven;
 	console.log(address);
 	console.log(formerAddress);
-	if(province=="" || city=="" || area=="" || address=="" || lng=="" ||lat==""){
-		$("#confidence").html("信息不完整，省、市、区、地址实体、经纬度不能为空");
+	if(area=="" || address=="" || lng=="" ||lat==""){
+		$("#confidence").html("省、市、区、地址、经纬度不能为空");
 	}else{
 		$.post("/AddressController/importAddress",{
 			"lng":lng,
@@ -410,9 +423,15 @@ function importAddress(type){
 			"city":city,
 			"area":area,
 			"town":town,
-			"street":street
+			"street":street,
+			"address" : completeAddress
 		},function(data){
-			$("#confidence").html(data.info);
+			if(data.status==0){
+				$("#confidence").html(data.info);
+			}else{
+				$("#prompt").show();
+				$("#prompt").html(data.info);
+			}
 		},"json")
 	}
 }
@@ -638,4 +657,11 @@ function intoAroundPage(){
 	var centerPoint = view.center; 
 	map.centerAndZoom(centerPoint,mapZoom);
 }
+
+$('#address').bind('keypress',function(event){ 
+    if(event.keyCode == "13"){
+    	$('#search').click();
+    }  
+
+});
 

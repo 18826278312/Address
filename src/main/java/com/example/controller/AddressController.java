@@ -202,18 +202,24 @@ public class AddressController {
 	}
 	
 	/**
-	 * 功能：地址录入
-	 * @param address		页面显示的地址
-	 * @param formerAddress	poi或者地址库返回的地址
-	 * @param lng			经度
-	 * @param lat			维度
-	 * @param type			类型：import表示录入，check表示验证
+	 * 地址录入
+	 * @param name
+	 * @param formerName
+	 * @param lng
+	 * @param lat
+	 * @param province
+	 * @param city
+	 * @param area
+	 * @param town
+	 * @param street
+	 * @param address
 	 * @return
 	 */
 	@RequestMapping(value="importAddress")
 	@ResponseBody
 	public Map<String, Object> importAddress(String name,String formerName,Double lng,Double lat,String province,String city,
-			String area,String town,String street){
+			String area,String town,String street,String address){
+		System.out.println(address);
 		Map<String, Object> map = new HashMap<String, Object>();
 		try {
 			//当前页面显示的地址

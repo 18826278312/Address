@@ -18,14 +18,14 @@ public interface AddressService {
 	 * 调用百度地图api获取地点的完整地址
 	 * @param placeResult
 	 */
-	void getCompleteAddress(PlaceResult placeResult);
+	void getCompleteAddress(PlaceResult placeResult) throws Exception;
 	
 	/**
 	 * 调用百度地图api获得经纬度对应的地址
 	 * @param lat
 	 * @param lng
 	 */
-	GeocoderDto getLocation(Double lat,Double lng);
+	GeocoderDto getLocation(Double lat,Double lng) throws Exception;
 	
 	/**
 	 * 调用百度地图api获取地址的经纬度信息
@@ -107,5 +107,5 @@ public interface AddressService {
 	 * @param baiduPlaceDto
 	 * @return
 	 */
-	List<PlaceResult> listPlaceResult(BaiduPlaceDto baiduPlaceDto);
+	List<PlaceResult> listPlaceResult(BaiduPlaceDto baiduPlaceDto) throws Exception;
 }

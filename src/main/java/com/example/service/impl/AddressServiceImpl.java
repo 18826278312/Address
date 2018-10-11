@@ -44,7 +44,7 @@ public class AddressServiceImpl implements AddressService{
     }
 	
 	@Override
-	public void getCompleteAddress(PlaceResult placeResult) {
+	public void getCompleteAddress(PlaceResult placeResult) throws Exception{
 		String url = "http://api.map.baidu.com/geocoder/v2/";
 		String param = "location=" + placeResult.getLocation().getLat() + "," + 
 				placeResult.getLocation().getLng() + "&output=json&extensions_town=true&ak=" + ak;
@@ -63,7 +63,7 @@ public class AddressServiceImpl implements AddressService{
 	}
 
 	@Override
-	public GeocoderDto getLocation(Double lat, Double lng) {
+	public GeocoderDto getLocation(Double lat, Double lng) throws Exception{
 		String url = "http://api.map.baidu.com/geocoder/v2/";
 		String param = "location=" + lat + "," + lng + "&output=json&extensions_town=true&ak=" + ak;
 		String json = HttpUtil.sendGet(url, param);
@@ -76,12 +76,7 @@ public class AddressServiceImpl implements AddressService{
 		String url = "https://restapi.amap.com/v3/place/text";
 		String param = "keywords=" + address + "&city=汕头市&offset=10&page=1&key=" + alibabaKey;
 		AlibabaPlaceDto placeDto = null;
-		try {
-			placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), AlibabaPlaceDto.class);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), AlibabaPlaceDto.class);
 		return placeDto;
 	}
 
@@ -90,27 +85,16 @@ public class AddressServiceImpl implements AddressService{
 		String url = "https://apis.map.qq.com/ws/place/v1/search";
 		String param = "keyword=" + address + "&page_size=10&page_index=1&boundary=region(汕头市)&key=" + tencentKey;
 		TencentPlaceDto placeDto = null;
-		try {
-			placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), TencentPlaceDto.class);
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), TencentPlaceDto.class);
 		return placeDto;
 	}
 
 	@Override
 	public BaiduPlaceDto getPlaceByBaidu(String address) throws Exception {
 		String url = "http://api.map.baidu.com/place/v2/search";
-		String param = "query=" + address + "&page_size=10&region=汕头市&output=json&ak=" + ak + "&page_num=0";
+		String param = "query=" + address + "&page_size=20&region=汕头市&output=json&ak=" + ak + "&page_num=0";
 		BaiduPlaceDto placeDto = null;
-		try {
-			placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), BaiduPlaceDto.class);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), BaiduPlaceDto.class);
 		return placeDto;
 	}
 
@@ -127,16 +111,11 @@ public class AddressServiceImpl implements AddressService{
 		String url = "http://api.map.baidu.com/place/v2/search";
 		String param = "query=" + pois[0] + "&location=" + lat + "," + lng + "&radius=" + range + "&output=json&ak=" + ak + "&page_size=10";
 		BaiduPlaceDto placeDto = null;
-		try {
-			placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), BaiduPlaceDto.class);
-			for(int i=1;i<pois.length;i++){
-				param = "query=" + pois[i] + "&location=" + lat + "," + lng + "&radius=" + range + "&output=json&ak=" + ak + "&page_size=10";
-				BaiduPlaceDto temp = JSONObject.parseObject(HttpUtil.sendGet(url, param), BaiduPlaceDto.class);
-				placeDto.getResults().addAll(temp.getResults());
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), BaiduPlaceDto.class);
+		for(int i=1;i<pois.length;i++){
+			param = "query=" + pois[i] + "&location=" + lat + "," + lng + "&radius=" + range + "&output=json&ak=" + ak + "&page_size=10";
+			BaiduPlaceDto temp = JSONObject.parseObject(HttpUtil.sendGet(url, param), BaiduPlaceDto.class);
+			placeDto.getResults().addAll(temp.getResults());
 		}
 		return placeDto;
 	}
@@ -146,16 +125,11 @@ public class AddressServiceImpl implements AddressService{
 		String url = "https://restapi.amap.com/v3/place/around";
 		String param = "key=" + alibabaKey + "&location=" + lat + "," + lng + "&offset=10&radius=" + range + "&types=" + pois[0];
 		AlibabaPlaceDto placeDto = null;
-		try {
-			placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), AlibabaPlaceDto.class);
-			for(int i=1;i<pois.length;i++){
-				param = "key=" + alibabaKey + "&location=" + lat + "," + lng + "&offset=10&radius=" + range + "&types=" + pois[i];
-				AlibabaPlaceDto temp = JSONObject.parseObject(HttpUtil.sendGet(url, param), AlibabaPlaceDto.class);
-				placeDto.getPois().addAll(temp.getPois());
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), AlibabaPlaceDto.class);
+		for(int i=1;i<pois.length;i++){
+			param = "key=" + alibabaKey + "&location=" + lat + "," + lng + "&offset=10&radius=" + range + "&types=" + pois[i];
+			AlibabaPlaceDto temp = JSONObject.parseObject(HttpUtil.sendGet(url, param), AlibabaPlaceDto.class);
+			placeDto.getPois().addAll(temp.getPois());
 		}
 		return placeDto;
 	}
@@ -165,16 +139,11 @@ public class AddressServiceImpl implements AddressService{
 		String url = "https://apis.map.qq.com/ws/place/v1/search";
 		String param = "keyword=" + pois[0] + "&key=" + tencentKey + "&boundary=nearby(" + lat + "," + lng + "," + range + ",0)&page_size=10";
 		TencentPlaceDto placeDto = null;
-		try {
-			placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), TencentPlaceDto.class);
-			for(int i=1;i<pois.length;i++){
-				param = "keyword=" + pois[i] + "&key=" + tencentKey + "&boundary=nearby(" + lat + "," + lng + "," + range + ",0)&page_size=10";
-				TencentPlaceDto temp = JSONObject.parseObject(HttpUtil.sendGet(url, param), TencentPlaceDto.class);
-				placeDto.getData().addAll(temp.getData());
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		placeDto = JSONObject.parseObject(HttpUtil.sendGet(url, param), TencentPlaceDto.class);
+		for(int i=1;i<pois.length;i++){
+			param = "keyword=" + pois[i] + "&key=" + tencentKey + "&boundary=nearby(" + lat + "," + lng + "," + range + ",0)&page_size=10";
+			TencentPlaceDto temp = JSONObject.parseObject(HttpUtil.sendGet(url, param), TencentPlaceDto.class);
+			placeDto.getData().addAll(temp.getData());
 		}
 		return placeDto;
 	}
@@ -191,85 +160,75 @@ public class AddressServiceImpl implements AddressService{
 	@Override
 	public List<PlaceResult> listPlaceResult(AlibabaPlaceDto alibabaPlaceDto,BaiduPlaceDto baiduPlaceDto,TencentPlaceDto tencentPlaceDto) throws Exception{
 		List<PlaceResult> list = new ArrayList<PlaceResult>();
-		try {
-			for(int i=0;i<baiduPlaceDto.getResults().size();i++){
-				PlaceResult placeResult = new PlaceResult();
-				placeResult.setName(baiduPlaceDto.getResults().get(i).getName());
-				AddressLocation addressLocation = new AddressLocation();
-				addressLocation.setLat(baiduPlaceDto.getResults().get(i).getLocation().getLat());
-				addressLocation.setLng(baiduPlaceDto.getResults().get(i).getLocation().getLng());
-				placeResult.setDataSources("百度地图");
-				placeResult.setLocation(addressLocation);
-				this.getCompleteAddress(placeResult);
-				list.add(placeResult);
+		for(int i=0;i<baiduPlaceDto.getResults().size();i++){
+			PlaceResult placeResult = new PlaceResult();
+			placeResult.setName(baiduPlaceDto.getResults().get(i).getName());
+			AddressLocation addressLocation = new AddressLocation();
+			addressLocation.setLat(baiduPlaceDto.getResults().get(i).getLocation().getLat());
+			addressLocation.setLng(baiduPlaceDto.getResults().get(i).getLocation().getLng());
+			placeResult.setDataSources("百度地图");
+			placeResult.setLocation(addressLocation);
+			this.getCompleteAddress(placeResult);
+			list.add(placeResult);
+		}
+		String coords = "";
+		for(int i=0;i<tencentPlaceDto.getData().size();i++){
+			TencentData data = tencentPlaceDto.getData().get(i);
+			coords = coords + data.getLocation().getLng() + "," + data.getLocation().getLat();
+			if (i<tencentPlaceDto.getData().size()-1) {
+				coords = coords  + ";";
 			}
-			String coords = "";
-			for(int i=0;i<tencentPlaceDto.getData().size();i++){
-				TencentData data = tencentPlaceDto.getData().get(i);
-				coords = coords + data.getLocation().getLng() + "," + data.getLocation().getLat();
-				if (i<tencentPlaceDto.getData().size()-1) {
-					coords = coords  + ";";
-				}
+		}
+		//将火星坐标转化为百度坐标
+		ChangeLocation location = this.changeLocation(coords);
+		for(int i=0;i<tencentPlaceDto.getData().size();i++){
+			PlaceResult placeResult = new PlaceResult();
+			placeResult.setName(tencentPlaceDto.getData().get(i).getTitle());
+			AddressLocation addressLocation = new AddressLocation();
+			addressLocation.setLat(location.getResult().get(i).getY());
+			addressLocation.setLng(location.getResult().get(i).getX());
+			placeResult.setDataSources("腾讯地图");
+			placeResult.setLocation(addressLocation);
+			this.getCompleteAddress(placeResult);
+			list.add(placeResult);
+		}
+		coords = "";
+		for(int i=0;i<alibabaPlaceDto.getPois().size();i++){
+			AlibabaPoi poi = alibabaPlaceDto.getPois().get(i);
+			coords = coords + poi.getLocation();
+			if (i<alibabaPlaceDto.getPois().size()-1) {
+				coords = coords  + ";";
 			}
-			//将火星坐标转化为百度坐标
-			ChangeLocation location = this.changeLocation(coords);
-			for(int i=0;i<tencentPlaceDto.getData().size();i++){
-				PlaceResult placeResult = new PlaceResult();
-				placeResult.setName(tencentPlaceDto.getData().get(i).getTitle());
-				AddressLocation addressLocation = new AddressLocation();
-				addressLocation.setLat(location.getResult().get(i).getY());
-				addressLocation.setLng(location.getResult().get(i).getX());
-				placeResult.setDataSources("腾讯地图");
-				placeResult.setLocation(addressLocation);
-				this.getCompleteAddress(placeResult);
-				list.add(placeResult);
-			}
-			coords = "";
-			for(int i=0;i<alibabaPlaceDto.getPois().size();i++){
-				AlibabaPoi poi = alibabaPlaceDto.getPois().get(i);
-				coords = coords + poi.getLocation();
-				if (i<alibabaPlaceDto.getPois().size()-1) {
-					coords = coords  + ";";
-				}
-			}
-			//将火星地图转化为百度地图
-			location = this.changeLocation(coords);
-			for(int i=0;i<alibabaPlaceDto.getPois().size();i++){
-				PlaceResult placeResult = new PlaceResult();
-				placeResult.setName(alibabaPlaceDto.getPois().get(i).getName());
-				AddressLocation addressLocation = new AddressLocation();
-				addressLocation.setLat(location.getResult().get(i).getY());
-				addressLocation.setLng(location.getResult().get(i).getX());
-				placeResult.setDataSources("高德地图");
-				placeResult.setLocation(addressLocation);
-				this.getCompleteAddress(placeResult);
-				list.add(placeResult);
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		}
+		//将火星地图转化为百度地图
+		location = this.changeLocation(coords);
+		for(int i=0;i<alibabaPlaceDto.getPois().size();i++){
+			PlaceResult placeResult = new PlaceResult();
+			placeResult.setName(alibabaPlaceDto.getPois().get(i).getName());
+			AddressLocation addressLocation = new AddressLocation();
+			addressLocation.setLat(location.getResult().get(i).getY());
+			addressLocation.setLng(location.getResult().get(i).getX());
+			placeResult.setDataSources("高德地图");
+			placeResult.setLocation(addressLocation);
+			this.getCompleteAddress(placeResult);
+			list.add(placeResult);
 		}
 		return list;
 	}
 
 	@Override
-	public List<PlaceResult> listPlaceResult(BaiduPlaceDto baiduPlaceDto) {
+	public List<PlaceResult> listPlaceResult(BaiduPlaceDto baiduPlaceDto) throws Exception{
 		List<PlaceResult> list = new ArrayList<PlaceResult>();
-		try {
-			for(int i=0;i<baiduPlaceDto.getResults().size();i++){
-				PlaceResult placeResult = new PlaceResult();
-				placeResult.setName(baiduPlaceDto.getResults().get(i).getName());
-				AddressLocation addressLocation = new AddressLocation();
-				addressLocation.setLat(baiduPlaceDto.getResults().get(i).getLocation().getLat());
-				addressLocation.setLng(baiduPlaceDto.getResults().get(i).getLocation().getLng());
-				placeResult.setDataSources("百度地图");
-				placeResult.setLocation(addressLocation);
-				this.getCompleteAddress(placeResult);
-				list.add(placeResult);
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for(int i=0;i<baiduPlaceDto.getResults().size();i++){
+			PlaceResult placeResult = new PlaceResult();
+			placeResult.setName(baiduPlaceDto.getResults().get(i).getName());
+			AddressLocation addressLocation = new AddressLocation();
+			addressLocation.setLat(baiduPlaceDto.getResults().get(i).getLocation().getLat());
+			addressLocation.setLng(baiduPlaceDto.getResults().get(i).getLocation().getLng());
+			placeResult.setDataSources("百度地图");
+			placeResult.setLocation(addressLocation);
+			this.getCompleteAddress(placeResult);
+			list.add(placeResult);
 		}
 		return list;
 	}
