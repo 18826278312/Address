@@ -4,12 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.List;
-import java.util.Map;
-
-import org.mockito.internal.creation.SuspendMethod;
-
-import com.example.dto.PlaceResult;
 
 public class HttpUtil {
 	

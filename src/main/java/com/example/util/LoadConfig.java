@@ -2,10 +2,8 @@ package com.example.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.util.Properties;
 
-import net.bytebuddy.asm.Advice.This;
 
 public class LoadConfig {
 	
