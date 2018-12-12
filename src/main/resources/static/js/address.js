@@ -8,6 +8,8 @@ var aroundPoiPage = 0;
 var aroundLibraryPage = 0;
 var clickLat = 0;
 var clickLnt = 0;
+var areaList = [];
+var townMap = {};
 var formerAddress;
 var top_left_control = new BMap.ScaleControl({anchor: BMAP_ANCHOR_BOTTOM_RIGHT});// 左上角，添加比例尺
 var top_left_navigation = new BMap.NavigationControl({anchor: BMAP_ANCHOR_BOTTOM_RIGHT});  //左上角，添加默认缩放平移控件
@@ -19,7 +21,7 @@ map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
 var bdary = new BMap.Boundary();
 bdary.get("汕头市", function(rs){       //获取行政区域
 	//map.clearOverlays();        //清除地图覆盖物       
-	var count = rs.boundaries.length; //行政区域的点有多少个
+	var count = rs.boundaries.length; //行政区域的点有多少个	
 	if (count === 0) {
 		alert('未能获取当前输入行政区域');
 		return ;
@@ -34,6 +36,14 @@ bdary.get("汕头市", function(rs){       //获取行政区域
 	map.setViewport(pointArray);    //调整视野  
 });
 
+$.post("/AddressController/getAreaAndStreet",function(data){
+	areaList = data.areaList,
+	townMap = data.townMap
+	for(var i=0;i<areaList.length;i++){
+		$("#area").append('<option value="'+ areaList[i] +'">'+ areaList[i] +'</option>');
+	}	
+},"json")
+
 //查找地址
 $("#search").click(function(){
 	$("#aroundPoi").hide();
@@ -44,15 +54,20 @@ $("#search").click(function(){
         	 map.removeOverlay(allOverlay[i]);
         }
     }
-	setEmpty();
 	$("#lat").val("");
 	$("#lng").val("");
+	$("#confidence").html("");
+	var area = $("#area").val();
 	var address = $("#address").val();
-	if(address!=null && address!=""){
+	if(address==""){
+		$("#confidence").html("请填写地址实体");
+	}else if(area==""){
+		$("#confidence").html("请选择区");
+	}else{
 		var xval=getBusyOverlay('viewport',{color:'gray', opacity:0.75, text:'viewport: loading...', style:'text-shadow: 0 0 3px black;font-weight:bold;font-size:16px;color:white'},{color:'#ff0', size:256, type:'o'});
 		xval.settext("数据获取中，请稍后......");
 		$.post("/AddressController/searchAddress",{
-			"address":address
+			"address":area+address
 		},function(data){
 			xval.remove();
 			if(data.status==0){
@@ -136,8 +151,7 @@ $("#search").click(function(){
 				var centerPoint = view.center; 
 				map.centerAndZoom(centerPoint,mapZoom);
 			}else{
-				$("#prompt").show();
-				$("#prompt").html(data.info);
+				$("#confidence").html(data.info);
 			}
 		},"json");
 	}
@@ -158,6 +172,7 @@ function clickAddress(place){
 	$("#town").empty();
 	$("#town").append('<option value="' + place.town + '">' + place.town + '</option>');
 	$("#confidence").html("");
+	changeSelect(place.area,place.town);
 	formerAddress = place.name;
 	var address = $("#address").val();
 	getAroundAddress(place.location.lat,place.location.lng);
@@ -165,15 +180,18 @@ function clickAddress(place){
 
 //点击逆向查找
 $("#reverseSearch").click(function(){
-	setEmpty();
 	var lng = $("#lng").val();
 	var lat = $("#lat").val();
-	getLocation(lat,lng)
+	$("#confidence").html("");
+	if(lng!="" && lat!=""){
+		getLocation(lat,lng)
+	}else{
+		$("#confidence").html("请输入经纬度");
+	}
 })
 
 //单击获取点击的经纬度
 map.addEventListener("click",function(e){
-	setEmpty();
     $("#lng").val(e.point.lng);
 	$("#lat").val(e.point.lat);
     getLocation(e.point.lat,e.point.lng);
@@ -184,9 +202,9 @@ function setEmpty(){
 	$("#confidence").html("");
 	$("#street").val("");
 	$("#province").empty();
-	$("#province").append('<option value="">广东省</option>');
+	$("#province").append('<option value="广东省">广东省</option>');
 	$("#city").empty();
-	$("#city").append('<option value="">汕头市</option>');
+	$("#city").append('<option value="汕头市">汕头市</option>');
 	$("#area").empty();
 	$("#area").append('<option value="">-区-</option>');
 	$("#town").empty();
@@ -210,6 +228,9 @@ $("#empty").click(function(){
         	 map.removeOverlay(allOverlay[i]);
         }
     }
+	for(var i=0;i<areaList.length;i++){
+		$("#area").append('<option value="'+ areaList[i] +'">'+ areaList[i] +'</option>');
+	}	
 })
 
 $("#copy").click(function(){
@@ -255,11 +276,11 @@ function getLocation(lat,lng){
 				$("#address").val(data.geocoderDto.result.sematic_description);
 			}
 			formerAddress = data.geocoderDto.result.sematic_description;
+			changeSelect(data.geocoderDto.result.addressComponent.district,data.geocoderDto.result.addressComponent.town);
 			//回填成功时候调用
 			getAroundAddress(lat,lng);
 		}else{
-			$("#prompt").show();
-			$("#prompt").html(data.info);
+			$("#confidence").html(data.info);
 		}
 	},"json");
 }
@@ -392,8 +413,7 @@ function getAroundAddress(lat,lng){
 			var centerPoint = view.center; 
 			map.centerAndZoom(centerPoint,mapZoom);
 		}else{
-			$("#prompt").show();
-			$("#prompt").html(data.info);
+			$("#confidence").html(data.info);
 		}
 	},"json")
 }
@@ -411,28 +431,30 @@ function importAddress(type){
 	var completeAddress = province + city + area + town + street + address + seven;
 	console.log(address);
 	console.log(formerAddress);
-	if(area=="" || address=="" || lng=="" ||lat==""){
-		$("#confidence").html("省、市、区、地址、经纬度不能为空");
+	if(province=="" || city=="" || area=="" || town=="" || street=="" || address=="" || lng=="" ||lat==""){
+		$("#confidence").html("地址信息不完整，录入失败");
 	}else{
-		$.post("/AddressController/importAddress",{
-			"lng":lng,
-			"lat":lat,
-			"name":address,
-			"formerName":formerAddress,
-			"province":province,
-			"city":city,
-			"area":area,
-			"town":town,
-			"street":street,
-			"address" : completeAddress
-		},function(data){
-			if(data.status==0){
+		if(window.confirm('你确定要录入该地址吗？')){ 
+			$.post("/AddressController/importAddress",{
+				"lng":lng,
+				"lat":lat,
+				"name":address,
+				"formerName":formerAddress,
+				"province":province,
+				"city":city,
+				"area":area,
+				"town":town,
+				"street":street,
+				"address" : completeAddress
+			},function(data){
 				$("#confidence").html(data.info);
-			}else{
-				$("#prompt").show();
-				$("#prompt").html(data.info);
-			}
-		},"json")
+		
+			},"json")
+	
+			return true; 
+		}else{ 
+			return false; 
+		} 
 	}
 }
 
@@ -665,3 +687,34 @@ $('#address').bind('keypress',function(event){
 
 });
 
+$("#area").change(function(){
+	var area = $(this).val();
+	$("#town").empty();
+	$("#town").append('<option value="">-街道-</option>');
+	for(var key in townMap){
+		if(key==area){
+			for(var i=0;i<townMap[key].length;i++){
+				$("#town").append('<option value="'+ townMap[key][i] +'">'+ townMap[key][i] +'</option>');
+			}
+			break;
+		}
+	}
+})
+
+function changeSelect(area,town){
+	for(var i=0;i<areaList.length;i++){
+		if(area!=areaList[i]){
+			$("#area").append('<option value="'+ areaList[i] +'">'+ areaList[i] +'</option>');
+		}
+	}
+	for(var key in townMap){
+		if(key==area){
+			for(var i=0;i<townMap[key].length;i++){
+				if(town!=townMap[key][i]){
+					$("#town").append('<option value="'+ townMap[key][i] +'">'+ townMap[key][i] +'</option>');
+				}
+			}
+			break;
+		}
+	}
+}

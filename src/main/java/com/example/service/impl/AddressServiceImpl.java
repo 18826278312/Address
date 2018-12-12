@@ -1,9 +1,9 @@
 package com.example.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,14 +16,12 @@ import com.example.dto.AlibabaPoi;
 import com.example.dto.BaiduPlaceDto;
 import com.example.dto.ChangeLocation;
 import com.example.dto.GeocoderDto;
-import com.example.dto.Location;
-import com.example.dto.PlaceDto;
 import com.example.dto.PlaceResult;
 import com.example.dto.TencentData;
 import com.example.dto.TencentPlaceDto;
 import com.example.service.AddressService;
+import com.example.util.FileUtil;
 import com.example.util.HttpUtil;
-import com.example.vo.AddressVo;
 
 @Service
 public class AddressServiceImpl implements AddressService{
@@ -38,10 +36,6 @@ public class AddressServiceImpl implements AddressService{
 	
 	@Value("${range}")
 	private Integer range;
-	
-	private static double rad(double d) { 
-        return d * Math.PI / 180.0; 
-    }
 	
 	@Override
 	public void getCompleteAddress(PlaceResult placeResult) throws Exception{
@@ -231,5 +225,54 @@ public class AddressServiceImpl implements AddressService{
 			list.add(placeResult);
 		}
 		return list;
+	}
+
+	@Override
+	public Map<String, Object> getAreaAndStreet() throws Exception {
+		Map<String, Object> map = new HashMap<String,Object>();
+		List<String> areaList = new ArrayList<String>();
+		List<String> list = null;
+		Map<String, List<String>> townMap = new HashMap<String, List<String>>();
+		List<String> fileList = FileUtil.readTxtFile("C:/Users/xiang/Desktop/家宽地址AI项目/汕头市区-街道二级联动.txt"); 
+		for(int j=1;j<fileList.size();j++){
+			String[] array = fileList.get(j).split(" ");
+			areaList.add(array[0]);
+			list = new ArrayList<String>();
+			for(int i=1;i<array.length;i++){
+				list.add(array[i]);
+			}
+			townMap.put(array[0], list);
+		}
+		map.put("areaList", areaList);
+		map.put("townMap", townMap);
+		return map;
+	}
+	
+	public static void main(String[] args){
+		List<String> fileList = FileUtil.readTxtFile("C:/Users/xiang/Desktop/家宽地址AI项目/汕头市区-街道二级联动.txt"); 
+		List<String> fileList1 = FileUtil.readTxtFile("C:/Users/xiang/Desktop/家宽地址AI项目/3.town.txt");
+		List<String> list = new ArrayList<String>();
+		List<String> list2 = new ArrayList<String>();
+		for(String town : fileList){
+			String[] array = town.split(" ");
+			for (int i = 1; i < array.length; i++) {
+				list.add(array[i]);
+			}
+		}
+		System.out.println(list.size());
+		
+		for(String town1 : fileList1){
+			int status = 0;
+			for(String town : list){
+				if (town1.equals(town)) {
+					status = 1;
+					break;
+				}
+			}
+			if (status==0) {
+				list2.add(town1);
+			}
+		}
+		System.out.println(JSONArray.toJSON(list2));
 	}
 }

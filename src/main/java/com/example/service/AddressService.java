@@ -1,6 +1,7 @@
 package com.example.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.example.dto.AddressDto;
 import com.example.dto.AlibabaPlaceDto;
@@ -108,4 +109,11 @@ public interface AddressService {
 	 * @return
 	 */
 	List<PlaceResult> listPlaceResult(BaiduPlaceDto baiduPlaceDto) throws Exception;
+	
+	/**
+	 * 读取汕头市区、街道的列表
+	 * @return
+	 * @throws Exception
+	 */
+	Map<String, Object> getAreaAndStreet() throws Exception;
 }

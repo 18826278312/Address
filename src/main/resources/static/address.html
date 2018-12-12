@@ -17,32 +17,29 @@
 <div id="content" class="content">
 	<div>
 		<div id="select" class="citys">
-			<select id="province" style="height:30px;width:80px;font-size:15px;" name="province"><option value="">广东省</option></select>
-			<select id="city" style="height:30px;width:80px;font-size:15px;" name="city"><option value="">汕头市</option></select>
-			<select id="area" style="height:30px;width:80px;font-size:15px;" name="area"><option value="">-区-</option></select>
-			<select id="town" style="height:30px;width:80px;font-size:15px;" name="town"><option value="">-街道-</option></select>
-			<input id="street" style="height:26px;width:80px;font-size:15px;padding-left:5px;" placeholder="道路">
+			<select id="province" style="height:25px;width:65px;font-size:12px;" name="province"><option value="广东省">广东省</option></select>
+			<select id="city" style="height:25px;width:65px;font-size:12px;" name="city"><option value="汕头市">汕头市</option></select>
+			<select id="area" style="height:25px;width:65px;font-size:12px;" name="area"><option value="">-区-</option></select>
+			<select id="town" style="height:25px;width:80px;font-size:12px;" name="town"><option value="">-街道-</option></select>
+			<input id="street" style="height:21px;width:80px;font-size:12px;padding-left:5px;" placeholder="道路">
 		</div>
 		
 		<div style="margin-top:10px;">
 			<input id="address" class="address" type="text" placeholder="地址实体">
 			<input id="seven" class="seven" type="text" placeholder="七级地址">
-		    <button id="search"  class="search">查找</button>
+		    <button id="search"  class="search">正查</button>
 	    </div>
 	    <div style="margin-top:10px;">
 			<input id="lng" class="lng" type="text" placeholder="经度">
 			<input id="lat" class="lat" type="text" placeholder="维度">
-		    <button id="reverseSearch" class="reverseSearch">逆向查找</button>
-		    <span></span>
+		    <button id="reverseSearch" class="search">反查</button>
 	    </div>
 	    <div style="margin-top:10px;">
 		    <button id="import" onclick="importAddress('import')" class="check">录入</button>
 		    <button id="empty" class="search">清空</button>
 		    <button id="copy" class="search">复制</button>
-		    <span style="margin-left:20px;font-size:15px;" id="confidence"></span>
+		    <span style=";margin-left:10px;font-size:12px;font-weight:bold;color:red;" id="confidence"></span>
 	    </div>
-    </div>
-     <div id="prompt" style="margin-top:10px;display:none;font-size:15px;">
     </div>
     <div style="margin-top:10px;overflow:auto;">
     	<div id="poi" class="poi">
@@ -70,11 +67,23 @@
     </div>
 </div>
 <div id="container"></div> 
+<!-- <div class="pop">
+	<div class="popMain">
+		<div class="popTop"></div>
+		<div class="popMiddle">
+			<p>是否确认删除？</p>
+		</div>
+		<div class="popBottom">
+			<span class="confirm">确认</span>
+			<span class="cancel">取消</span>
+		</div>
+	</div>
+</div> -->
 </body>
 <script type="text/javascript" src="http://lbsyun.baidu.com/jsdemo/data/points-sample-data.js"></script>
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ijfwv9AuV1fGln7IFVoBCarOs8GE0pxb"></script>
 <script type="text/javascript" src="../js/jquery.min.js"></script>
 <script type="text/javascript" src="../js/jquery.citys.js"></script>
-<script type="text/javascript" src="../js/address.js"></script>
+<script type="text/javascript" src="../js/address_copy.js"></script>
 <script type="text/javascript" src="../js/cvi_busy_lib.js"></script>
 </html>

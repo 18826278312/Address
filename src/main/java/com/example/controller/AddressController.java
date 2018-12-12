@@ -5,26 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
-
-import org.apache.poi.ss.formula.functions.EDate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.dto.AddressDto;
 import com.example.dto.AddressLocation;
-import com.example.dto.AlibabaPlaceDto;
-import com.example.dto.AlibabaPoi;
 import com.example.dto.BaiduPlaceDto;
-import com.example.dto.ChangeLocation;
 import com.example.dto.GeocoderDto;
-import com.example.dto.PlaceDto;
 import com.example.dto.PlaceResult;
-import com.example.dto.TencentData;
-import com.example.dto.TencentPlaceDto;
 import com.example.service.AddressService;
 
 @Controller
@@ -38,6 +28,24 @@ public class AddressController {
 	public String address(){
 		System.out.println("address");
 		return "address";
+	}
+	
+	@RequestMapping(value="getAreaAndStreet")
+	@ResponseBody
+	public Map<String, Object> getAreaAndStreet(){
+		Map<String, Object> map = new HashMap<String, Object>();
+		try{
+			Map<String, Object> areaMap = addressService.getAreaAndStreet();
+			System.out.println(JSONArray.toJSON(areaMap.get("areaList")));
+			System.out.println(JSONObject.toJSON(areaMap.get("townMap")));
+			map.put("areaList", areaMap.get("areaList"));
+			map.put("townMap", areaMap.get("townMap"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			map.put("status", 5);
+			map.put("info", "系统异常：" + e.toString());
+		}
+		return map;
 	}
 	
 	/**
@@ -74,6 +82,7 @@ public class AddressController {
 					list2.add(poiList.get(i));
 				}
 			}
+			
 			map.put("status", 0);
 			map.put("poi", poiList);
 			map.put("library", list2);
